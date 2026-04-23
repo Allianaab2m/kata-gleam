@@ -1,0 +1,79 @@
+version: "3"
+
+tasks:
+  test:
+    desc: Run tests for all packages
+    cmds:
+      - task: test:kata
+      - task: test:kata-json
+
+  test:kata:
+    desc: Run kata tests
+    dir: kata
+    cmds:
+      - gleam test
+
+  test:kata-json:
+    desc: Run kata_json tests
+    dir: kata_json
+    cmds:
+      - gleam test
+
+  check:
+    desc: Type-check all packages
+    cmds:
+      - task: check:kata
+      - task: check:kata-json
+
+  check:kata:
+    desc: Type-check kata
+    dir: kata
+    cmds:
+      - gleam check
+
+  check:kata-json:
+    desc: Type-check kata_json
+    dir: kata_json
+    cmds:
+      - gleam check
+
+  fmt:
+    desc: Format all packages
+    cmds:
+      - task: fmt:kata
+      - task: fmt:kata-json
+
+  fmt:kata:
+    desc: Format kata
+    dir: kata
+    cmds:
+      - gleam format src/ test/
+
+  fmt:kata-json:
+    desc: Format kata_json
+    dir: kata_json
+    cmds:
+      - gleam format src/ test/
+
+  fmt:check:
+    desc: Check formatting for all packages
+    cmds:
+      - task: fmt:check:kata
+      - task: fmt:check:kata-json
+
+  fmt:check:kata:
+    dir: kata
+    cmds:
+      - gleam format --check src/ test/
+
+  fmt:check:kata-json:
+    dir: kata_json
+    cmds:
+      - gleam format --check src/ test/
+
+  ci:
+    desc: Run all CI checks (format, check, test)
+    cmds:
+      - task: fmt:check
+      - task: check
+      - task: test
