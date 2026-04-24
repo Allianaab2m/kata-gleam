@@ -97,4 +97,7 @@ tasks:
       # Switch kata dep to version for publish
       - sed -i '' 's|kata = { path = "../kata" }|kata = ">= 0.1.0 and < 1.0.0"|' gleam.toml
       - defer: { cmd: "sed -i '' 's|kata = \">= 0.1.0 and < 1.0.0\"|kata = { path = \"../kata\" }|' gleam.toml" }
+      # Clear build cache and re-resolve deps from hex
+      - rm -rf build
+      - gleam deps download
       - gleam publish
