@@ -51,3 +51,38 @@ pub fn brand_ast_test() {
     _ -> should.fail()
   }
 }
+
+// --- from_string smart constructor ---
+
+pub fn from_string_valid_test() {
+  kata.from_string(email_schema(), "test@example.com")
+  |> should.equal(Ok(Email("test@example.com")))
+}
+
+pub fn from_string_invalid_test() {
+  kata.from_string(email_schema(), "not-an-email")
+  |> should.be_error()
+}
+
+pub fn from_string_empty_test() {
+  kata.from_string(email_schema(), "")
+  |> should.be_error()
+}
+
+pub fn from_int_test() {
+  let age_schema =
+    kata.int()
+    |> refine.min(0)
+    |> refine.max(150)
+  kata.from_int(age_schema, 30)
+  |> should.equal(Ok(30))
+}
+
+pub fn from_int_invalid_test() {
+  let age_schema =
+    kata.int()
+    |> refine.min(0)
+    |> refine.max(150)
+  kata.from_int(age_schema, -1)
+  |> should.be_error()
+}
