@@ -1,7 +1,11 @@
 name = "kata"
 version = "0.1.0"
-description = "A bidirectional schema library for Gleam"
+description = "A bidirectional schema library for Gleam. Define once, decode and encode with the same definition."
 licences = ["MIT"]
+repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }
+links = [
+  { title = "kata_json", href = "https://hex.pm/packages/kata_json" },
+]
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
