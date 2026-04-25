@@ -38,6 +38,10 @@
         let
           stdenv = pkgs.stdenv;
 
+          packages = with pkgs; [
+            go-task
+          ];
+
           erlangPackages = with pkgs.beamMinimal28Packages; [
             erlang
             rebar3
@@ -99,6 +103,7 @@
               [
                 nixd
               ]
+              ++ packages
               ++ erlangPackages
               # ++ javascriptPackages
               ++ gleamPackages;
