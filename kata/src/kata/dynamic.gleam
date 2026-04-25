@@ -5,6 +5,7 @@ import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/list
 import gleam/option.{None}
+import gleam/result
 import kata/value.{
   type Value, VBool, VFloat, VInt, VList, VNull, VObject, VString,
 }
@@ -13,49 +14,44 @@ import kata/value.{
 /// Tries Bool, Int, Float, String, List, Dict in order.
 /// Nil/None/null becomes VNull.
 pub fn from_dynamic(d: dynamic.Dynamic) -> Result(Value, String) {
-  // Try each decoder in order
-  case decode.run(d, decode.bool) {
-    Ok(b) -> Ok(VBool(b))
-    Error(_) ->
-      case decode.run(d, decode.int) {
-        Ok(n) -> Ok(VInt(n))
-        Error(_) ->
-          case decode.run(d, decode.float) {
-            Ok(f) -> Ok(VFloat(f))
-            Error(_) ->
-              case decode.run(d, decode.string) {
-                Ok(s) -> Ok(VString(s))
-                Error(_) ->
-                  case decode.run(d, decode.list(decode.dynamic)) {
-                    Ok(items) -> {
-                      try_decode_list(items, [])
-                    }
-                    Error(_) ->
-                      case
-                        decode.run(
-                          d,
-                          decode.dict(decode.string, decode.dynamic),
-                        )
-                      {
-                        Ok(entries) -> {
-                          try_decode_dict(dict.to_list(entries), [])
-                        }
-                        Error(_) ->
-                          // Try optional (nil/null/undefined)
-                          case decode.run(d, decode.optional(decode.string)) {
-                            Ok(None) -> Ok(VNull)
-                            _ ->
-                              Error(
-                                "unsupported dynamic type: "
-                                <> dynamic.classify(d),
-                              )
-                          }
-                      }
-                  }
-              }
-          }
-      }
+  {
+    use <- result.lazy_or(attempt(d, decode.bool, VBool))
+    use <- result.lazy_or(attempt(d, decode.int, VInt))
+    use <- result.lazy_or(attempt(d, decode.float, VFloat))
+    use <- result.lazy_or(attempt(d, decode.string, VString))
+    use <- result.lazy_or(try_list(d))
+    use <- result.lazy_or(try_dict(d))
+    case decode.run(d, decode.optional(decode.string)) {
+      Ok(None) -> Ok(VNull)
+      _ -> Error(Nil)
+    }
   }
+  |> result.replace_error("unsupported dynamic type: " <> dynamic.classify(d))
+}
+
+fn attempt(
+  d: dynamic.Dynamic,
+  decoder: decode.Decoder(a),
+  wrap: fn(a) -> Value,
+) -> Result(Value, Nil) {
+  decode.run(d, decoder)
+  |> result.map(wrap)
+  |> result.replace_error(Nil)
+}
+
+fn try_list(d: dynamic.Dynamic) -> Result(Value, Nil) {
+  use items <- result.try(
+    decode.run(d, decode.list(decode.dynamic)) |> result.replace_error(Nil),
+  )
+  try_decode_list(items, []) |> result.replace_error(Nil)
+}
+
+fn try_dict(d: dynamic.Dynamic) -> Result(Value, Nil) {
+  use entries <- result.try(
+    decode.run(d, decode.dict(decode.string, decode.dynamic))
+    |> result.replace_error(Nil),
+  )
+  try_decode_dict(dict.to_list(entries), []) |> result.replace_error(Nil)
 }
 
 fn try_decode_list(
