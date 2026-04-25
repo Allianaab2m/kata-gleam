@@ -4,6 +4,7 @@ import gleam/dict
 import gleam/option.{type Option}
 import kata/ast
 import kata/error
+import kata/format
 import kata/schema
 import kata/value
 
@@ -20,6 +21,15 @@ pub type Ast =
 
 pub type Error =
   error.Error
+
+pub type Format(raw) =
+  format.Format(raw)
+
+pub type ParseMode =
+  format.ParseMode
+
+pub type DecodeError =
+  format.DecodeError
 
 // --- Primitives ---
 
