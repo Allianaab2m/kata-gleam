@@ -4,7 +4,7 @@
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/kata_form/)
 
 ```sh
-gleam add kata_form@1
+gleam add kata_form
 ```
 ```gleam
 import kata_form

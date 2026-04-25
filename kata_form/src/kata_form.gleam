@@ -78,7 +78,7 @@ fn value_to_string(v: Value) -> Result(String, String) {
 pub fn parse(body: String) -> Result(Value, String) {
   case uri.parse_query(body) {
     Ok(pairs) -> Ok(pairs_to_value(pairs))
-    Error(_) -> Error("invalid URL-encoded form data")
+    Error(_) -> Error("invalid URL-encoded form data: " <> body)
   }
 }
 
@@ -99,8 +99,11 @@ pub fn decode(schema: Schema(a), body: String) -> Result(a, FormError) {
 pub fn decode_pairs(
   schema: Schema(a),
   pairs: List(#(String, String)),
-) -> Result(a, List(Error)) {
-  schema.decode(schema, pairs_to_value(pairs))
+) -> Result(a, FormError) {
+  case schema.decode(schema, pairs_to_value(pairs)) {
+    Ok(a) -> Ok(a)
+    Error(errs) -> Error(SchemaError(errs))
+  }
 }
 
 /// Convert key-value pairs to a kata Value.
