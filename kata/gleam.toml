@@ -11,5 +11,5 @@ links = [
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
 gleam_regexp = ">= 1.0.0 and < 2.0.0"
 
-[dev_dependencies]
+[dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
