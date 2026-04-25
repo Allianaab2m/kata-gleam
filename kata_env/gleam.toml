@@ -1,5 +1,5 @@
 name = "kata_env"
-version = "0.1.0"
+version = "0.2.0"
 description = "Environment variable adapter for kata"
 licences = ["MIT"]
 repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }

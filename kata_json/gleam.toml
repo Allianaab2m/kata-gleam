@@ -1,5 +1,5 @@
 name = "kata_json"
-version = "0.1.0"
+version = "0.2.0"
 description = "JSON adapter for kata, the bidirectional schema library for Gleam."
 licences = ["MIT"]
 repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }
