@@ -9,5 +9,5 @@ gleam_stdlib = ">= 1.0.0 and < 2.0.0"
 envoy = ">= 1.0.0 and < 2.0.0"
 kata = { path = "../kata" }
 
-[dev_dependencies]
+[dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
