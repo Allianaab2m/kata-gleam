@@ -2,7 +2,7 @@
 /// Unifies decode/encode across different wire formats (JSON, form data, etc.).
 import gleam/result
 import kata/error.{type Error}
-import kata/schema.{type Schema}
+import kata/schema as kata_schema
 import kata/value.{type Value}
 
 /// Describes the parsing behavior of a format.
@@ -33,22 +33,22 @@ pub type DecodeError {
 
 /// Decode raw input through a format and schema in one step.
 pub fn decode(
-  schema: Schema(a),
+  s: kata_schema.Schema(a),
   format: Format(raw),
   input: raw,
 ) -> Result(a, DecodeError) {
   use value <- result.try(
     format.parse(input) |> result.map_error(ParseError),
   )
-  schema.decode(schema, value) |> result.map_error(SchemaError)
+  kata_schema.decode(s, value) |> result.map_error(SchemaError)
 }
 
 /// Encode a typed value to raw output through a schema and format.
 pub fn encode(
-  schema: Schema(a),
+  s: kata_schema.Schema(a),
   format: Format(raw),
   value: a,
 ) -> Result(raw, String) {
-  let v = schema.encode(schema, value)
+  let v = kata_schema.encode(s, value)
   format.serialize(v)
 }
