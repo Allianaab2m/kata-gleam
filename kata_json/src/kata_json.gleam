@@ -6,6 +6,7 @@ import gleam/json
 import gleam/list
 import gleam/option.{None, Some}
 import kata/error.{type Error}
+import kata/format.{type Format, Format, Strict}
 import kata/schema
 import kata/value.{
   type Value, VBool, VFloat, VInt, VList, VNull, VObject, VString,
@@ -16,6 +17,16 @@ pub type JsonError {
   ParseError(message: String)
   /// Schema validation error
   SchemaError(errors: List(Error))
+}
+
+/// JSON format for use with kata/format.decode and kata/format.encode.
+pub fn format() -> Format(String) {
+  Format(
+    name: "json",
+    parse: parse,
+    serialize: fn(v) { Ok(serialize(v)) },
+    mode: Strict,
+  )
 }
 
 /// Parse a JSON string into a Value (schema-independent).
