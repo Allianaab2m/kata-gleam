@@ -22,7 +22,6 @@
 /// let assert Ok(config) = kata_env.decode(config_schema())
 /// ```
 import envoy
-import gleam/bool
 import gleam/dict
 import gleam/float
 import gleam/int
@@ -75,7 +74,8 @@ fn value_to_string(v: Value) -> Result(String, String) {
     VString(s) -> Ok(s)
     VInt(n) -> Ok(int.to_string(n))
     VFloat(f) -> Ok(float.to_string(f))
-    VBool(b) -> Ok(bool.to_string(b))
+    VBool(True) -> Ok("true")
+    VBool(False) -> Ok("false")
     VNull -> Ok("")
     VList(_) -> Error("env format cannot serialize lists")
     VObject(_) -> Error("env format cannot serialize nested objects")

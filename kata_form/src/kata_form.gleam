@@ -16,17 +16,61 @@
 ///
 /// let assert Ok(login) = kata_form.decode(login_schema(), "email=a%40b.com&remember=true")
 /// ```
+import gleam/float
+import gleam/int
 import gleam/list
 import gleam/uri
 import kata/error.{type Error}
+import kata/format.{type Format, Coerce, Format}
 import kata/schema.{type Schema}
-import kata/value.{type Value, VObject, VString}
+import kata/value.{
+  type Value, VBool, VFloat, VInt, VList, VNull, VObject, VString,
+}
 
 pub type FormError {
   /// Failed to parse URL-encoded form body
   ParseError(message: String)
   /// Schema validation failed
   SchemaError(errors: List(Error))
+}
+
+/// Form format for use with kata/format.decode and kata/format.encode.
+pub fn format() -> Format(String) {
+  Format(name: "form", parse: parse, serialize: serialize, mode: Coerce)
+}
+
+/// Serialize a Value to a URL-encoded form string.
+/// Only VObject with string-representable values is supported.
+pub fn serialize(v: Value) -> Result(String, String) {
+  case v {
+    VObject(entries) -> {
+      let result =
+        list.try_map(entries, fn(pair) {
+          case value_to_string(pair.1) {
+            Ok(s) -> Ok(#(pair.0, s))
+            Error(e) -> Error(e)
+          }
+        })
+      case result {
+        Ok(pairs) -> Ok(uri.query_to_string(pairs))
+        Error(e) -> Error(e)
+      }
+    }
+    _ -> Error("form format can only serialize VObject")
+  }
+}
+
+fn value_to_string(v: Value) -> Result(String, String) {
+  case v {
+    VString(s) -> Ok(s)
+    VInt(n) -> Ok(int.to_string(n))
+    VFloat(f) -> Ok(float.to_string(f))
+    VBool(True) -> Ok("true")
+    VBool(False) -> Ok("false")
+    VNull -> Ok("")
+    VList(_) -> Error("form format cannot serialize lists")
+    VObject(_) -> Error("form format cannot serialize nested objects")
+  }
 }
 
 /// Parse a URL-encoded form body into a kata Value.
