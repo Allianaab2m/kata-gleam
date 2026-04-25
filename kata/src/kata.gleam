@@ -4,6 +4,7 @@ import gleam/dict
 import gleam/option.{type Option}
 import kata/ast
 import kata/error
+import kata/format
 import kata/schema
 import kata/value
 
@@ -20,6 +21,15 @@ pub type Ast =
 
 pub type Error =
   error.Error
+
+pub type Format(raw) =
+  format.Format(raw)
+
+pub type ParseMode =
+  format.ParseMode
+
+pub type DecodeError =
+  format.DecodeError
 
 // --- Primitives ---
 
@@ -126,4 +136,33 @@ pub fn encode(s: Schema(a), v: a) -> Value {
 
 pub fn to_ast(s: Schema(a)) -> Ast {
   schema.to_ast(s)
+}
+
+// --- Smart constructors ---
+
+/// Construct a validated value from a String.
+/// Useful for building smart constructors for branded opaque types.
+///
+/// ```gleam
+/// pub fn new_email(s: String) -> Result(UserEmail, List(kata.Error)) {
+///   kata.from_string(user_email_schema(), s)
+/// }
+/// ```
+pub fn from_string(s: Schema(a), value: String) -> Result(a, List(Error)) {
+  schema.from_string(s, value)
+}
+
+/// Construct a validated value from an Int.
+pub fn from_int(s: Schema(a), value: Int) -> Result(a, List(Error)) {
+  schema.from_int(s, value)
+}
+
+/// Construct a validated value from a Float.
+pub fn from_float(s: Schema(a), value: Float) -> Result(a, List(Error)) {
+  schema.from_float(s, value)
+}
+
+/// Construct a validated value from a Bool.
+pub fn from_bool(s: Schema(a), value: Bool) -> Result(a, List(Error)) {
+  schema.from_bool(s, value)
 }

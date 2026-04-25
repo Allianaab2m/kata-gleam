@@ -41,6 +41,36 @@ pub fn to_ast(schema: Schema(a)) -> Ast {
   schema.ast
 }
 
+// --- Smart constructors ---
+// Validate a raw value through a schema (e.g. brand + refine).
+// Useful for building smart constructors for opaque types.
+
+/// Construct a validated value from a String.
+pub fn from_string(
+  schema: Schema(a),
+  value: String,
+) -> Result(a, List(Error)) {
+  schema.decode(VString(value))
+}
+
+/// Construct a validated value from an Int.
+pub fn from_int(schema: Schema(a), value: Int) -> Result(a, List(Error)) {
+  schema.decode(VInt(value))
+}
+
+/// Construct a validated value from a Float.
+pub fn from_float(
+  schema: Schema(a),
+  value: Float,
+) -> Result(a, List(Error)) {
+  schema.decode(VFloat(value))
+}
+
+/// Construct a validated value from a Bool.
+pub fn from_bool(schema: Schema(a), value: Bool) -> Result(a, List(Error)) {
+  schema.decode(VBool(value))
+}
+
 // --- Primitives ---
 
 pub fn string() -> Schema(String) {
