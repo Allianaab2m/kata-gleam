@@ -1,0 +1,15 @@
+name = "kata_wisp"
+version = "0.1.0"
+description = "Wisp integration for kata schema validation"
+licences = ["MIT"]
+repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+wisp = ">= 2.0.0 and < 3.0.0"
+kata = { path = "../kata" }
+kata_json = { path = "../kata_json" }
+kata_form = { path = "../kata_form" }
+
+[dev_dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"

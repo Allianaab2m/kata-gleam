@@ -1,0 +1,12 @@
+name = "kata_form"
+version = "0.1.0"
+description = "Form data adapter for kata"
+licences = ["MIT"]
+repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }
+
+[dependencies]
+gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+kata = { path = "../kata" }
+
+[dev_dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
