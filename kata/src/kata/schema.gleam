@@ -1,4 +1,6 @@
 import gleam/dict
+import gleam/float as gleam_float
+import gleam/int as gleam_int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -88,6 +90,66 @@ pub fn bool() -> Schema(Bool) {
     decode: fn(v) {
       case v {
         VBool(b) -> Ok(b)
+        other -> type_mismatch_error("bool", other)
+      }
+    },
+    encode: fn(b) { VBool(b) },
+    ast: AstBool,
+    dummy: fn() { False },
+  )
+}
+
+// --- Coercing primitives (for string-based formats: form, env) ---
+
+/// Int schema that also accepts VString parseable as integer.
+pub fn coerce_int() -> Schema(Int) {
+  Schema(
+    decode: fn(v) {
+      case v {
+        VInt(n) -> Ok(n)
+        VString(s) ->
+          case gleam_int.parse(s) {
+            Ok(n) -> Ok(n)
+            Error(_) -> type_mismatch_error("int", v)
+          }
+        other -> type_mismatch_error("int", other)
+      }
+    },
+    encode: fn(n) { VInt(n) },
+    ast: AstInt([]),
+    dummy: fn() { 0 },
+  )
+}
+
+/// Float schema that also accepts VString parseable as float, or VInt.
+pub fn coerce_float() -> Schema(Float) {
+  Schema(
+    decode: fn(v) {
+      case v {
+        VFloat(f) -> Ok(f)
+        VInt(n) -> Ok(gleam_int.to_float(n))
+        VString(s) ->
+          case gleam_float.parse(s) {
+            Ok(f) -> Ok(f)
+            Error(_) -> type_mismatch_error("float", v)
+          }
+        other -> type_mismatch_error("float", other)
+      }
+    },
+    encode: fn(f) { VFloat(f) },
+    ast: AstFloat([]),
+    dummy: fn() { 0.0 },
+  )
+}
+
+/// Bool schema that also accepts VString "true"/"false".
+pub fn coerce_bool() -> Schema(Bool) {
+  Schema(
+    decode: fn(v) {
+      case v {
+        VBool(b) -> Ok(b)
+        VString("true") -> Ok(True)
+        VString("false") -> Ok(False)
         other -> type_mismatch_error("bool", other)
       }
     },
