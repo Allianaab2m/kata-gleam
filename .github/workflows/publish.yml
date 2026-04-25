@@ -1,0 +1,114 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep '^version' kata/gleam.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if already released
+        id: check
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "v${{ steps.version.outputs.version }} already exists, skipping publish"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Gleam
+        if: steps.check.outputs.skip == 'false'
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27"
+          gleam-version: "1.14"
+
+      - name: Setup Task
+        if: steps.check.outputs.skip == 'false'
+        uses: arduino/setup-task@v2
+
+      - name: Run tests
+        if: steps.check.outputs.skip == 'false'
+        run: task test
+
+      - name: Validate versions match
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          for pkg in kata kata_json kata_form kata_env; do
+            PKG_VERSION=$(grep '^version' "$pkg/gleam.toml" | sed 's/version = "\(.*\)"/\1/')
+            if [ "$PKG_VERSION" != "$VERSION" ]; then
+              echo "::error::Version mismatch: kata=$VERSION but $pkg=$PKG_VERSION"
+              exit 1
+            fi
+          done
+          echo "All packages at v$VERSION"
+
+      - name: Publish kata
+        if: steps.check.outputs.skip == 'false'
+        env:
+          HEXPM_API_KEY: ${{ secrets.HEXPM_API_KEY }}
+        run: |
+          cd kata
+          gleam publish --yes
+
+      - name: Publish kata_json
+        if: steps.check.outputs.skip == 'false'
+        env:
+          HEXPM_API_KEY: ${{ secrets.HEXPM_API_KEY }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd kata_json
+          sed -i "s|kata = { path = \"../kata\" }|kata = \">= ${VERSION} and < 1.0.0\"|" gleam.toml
+          rm -rf build
+          gleam deps download
+          gleam publish --yes
+
+      - name: Publish kata_form
+        if: steps.check.outputs.skip == 'false'
+        env:
+          HEXPM_API_KEY: ${{ secrets.HEXPM_API_KEY }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd kata_form
+          sed -i "s|kata = { path = \"../kata\" }|kata = \">= ${VERSION} and < 1.0.0\"|" gleam.toml
+          rm -rf build
+          gleam deps download
+          gleam publish --yes
+
+      - name: Publish kata_env
+        if: steps.check.outputs.skip == 'false'
+        env:
+          HEXPM_API_KEY: ${{ secrets.HEXPM_API_KEY }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd kata_env
+          sed -i "s|kata = { path = \"../kata\" }|kata = \">= ${VERSION} and < 1.0.0\"|" gleam.toml
+          rm -rf build
+          gleam deps download
+          gleam publish --yes
+
+      - name: Create tag and GitHub Release
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+          gh release create "$VERSION" --generate-notes
