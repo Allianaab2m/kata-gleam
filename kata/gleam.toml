@@ -1,5 +1,5 @@
 name = "kata"
-version = "0.1.0"
+version = "0.2.0"
 description = "A bidirectional schema library for Gleam. Define once, decode and encode with the same definition."
 licences = ["MIT"]
 repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }
@@ -11,5 +11,5 @@ links = [
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
 gleam_regexp = ">= 1.0.0 and < 2.0.0"
 
-[dev_dependencies]
+[dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

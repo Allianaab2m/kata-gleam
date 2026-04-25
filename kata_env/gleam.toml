@@ -1,15 +1,12 @@
-name = "kata_json"
+name = "kata_env"
 version = "0.2.0"
-description = "JSON adapter for kata, the bidirectional schema library for Gleam."
+description = "Environment variable adapter for kata"
 licences = ["MIT"]
 repository = { type = "github", user = "Allianaab2m", repo = "kata-gleam" }
-links = [
-  { title = "kata", href = "https://hex.pm/packages/kata" },
-]
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
-gleam_json = ">= 3.0.0 and < 4.0.0"
+envoy = ">= 1.0.0 and < 2.0.0"
 kata = { path = "../kata" }
 
 [dev-dependencies]

@@ -1,11 +1,18 @@
 version: "3"
 
+vars:
+  PACKAGES: kata kata_json kata_form kata_env
+  VERSION:
+    sh: grep '^version' kata/gleam.toml | sed 's/version = "\(.*\)"/\1/'
+
 tasks:
   test:
     desc: Run tests for all packages
     cmds:
       - task: test:kata
       - task: test:kata-json
+      - task: test:kata-form
+      - task: test:kata-env
 
   test:kata:
     desc: Run kata tests
@@ -19,21 +26,43 @@ tasks:
     cmds:
       - gleam test
 
+  test:kata-form:
+    desc: Run kata_form tests
+    dir: kata_form
+    cmds:
+      - gleam test
+
+  test:kata-env:
+    desc: Run kata_env tests
+    dir: kata_env
+    cmds:
+      - gleam test
+
   check:
     desc: Type-check all packages
     cmds:
       - task: check:kata
       - task: check:kata-json
+      - task: check:kata-form
+      - task: check:kata-env
 
   check:kata:
-    desc: Type-check kata
     dir: kata
     cmds:
       - gleam check
 
   check:kata-json:
-    desc: Type-check kata_json
     dir: kata_json
+    cmds:
+      - gleam check
+
+  check:kata-form:
+    dir: kata_form
+    cmds:
+      - gleam check
+
+  check:kata-env:
+    dir: kata_env
     cmds:
       - gleam check
 
@@ -42,16 +71,26 @@ tasks:
     cmds:
       - task: fmt:kata
       - task: fmt:kata-json
+      - task: fmt:kata-form
+      - task: fmt:kata-env
 
   fmt:kata:
-    desc: Format kata
     dir: kata
     cmds:
       - gleam format src/ test/
 
   fmt:kata-json:
-    desc: Format kata_json
     dir: kata_json
+    cmds:
+      - gleam format src/ test/
+
+  fmt:kata-form:
+    dir: kata_form
+    cmds:
+      - gleam format src/ test/
+
+  fmt:kata-env:
+    dir: kata_env
     cmds:
       - gleam format src/ test/
 
@@ -60,6 +99,8 @@ tasks:
     cmds:
       - task: fmt:check:kata
       - task: fmt:check:kata-json
+      - task: fmt:check:kata-form
+      - task: fmt:check:kata-env
 
   fmt:check:kata:
     dir: kata
@@ -71,6 +112,27 @@ tasks:
     cmds:
       - gleam format --check src/ test/
 
+  fmt:check:kata-form:
+    dir: kata_form
+    cmds:
+      - gleam format --check src/ test/
+
+  fmt:check:kata-env:
+    dir: kata_env
+    cmds:
+      - gleam format --check src/ test/
+
+  bump:
+    desc: Bump version for all packages
+    requires:
+      vars: [NEW_VERSION]
+    cmds:
+      - |
+        for dir in kata kata_json kata_form kata_env; do
+          sed "s/^version = \".*\"/version = \"{{.NEW_VERSION}}\"/" "$dir/gleam.toml" > "$dir/gleam.toml.tmp" && mv "$dir/gleam.toml.tmp" "$dir/gleam.toml"
+        done
+      - echo "Bumped all packages to {{.NEW_VERSION}}"
+
   ci:
     desc: Run all CI checks (format, check, test)
     cmds:
@@ -79,10 +141,12 @@ tasks:
       - task: test
 
   publish:
-    desc: Publish kata then kata_json to hex.pm
+    desc: Publish all packages to hex.pm (in dependency order)
     cmds:
       - task: publish:kata
       - task: publish:kata-json
+      - task: publish:kata-form
+      - task: publish:kata-env
 
   publish:kata:
     desc: Publish kata to hex.pm
@@ -91,13 +155,32 @@ tasks:
       - gleam publish
 
   publish:kata-json:
-    desc: Publish kata_json to hex.pm (switches kata dep from path to version)
+    desc: Publish kata_json to hex.pm
     dir: kata_json
     cmds:
-      # Switch kata dep to version for publish
-      - sed -i '' 's|kata = { path = "../kata" }|kata = ">= 0.1.0 and < 1.0.0"|' gleam.toml
-      - defer: { cmd: "sed -i '' 's|kata = \">= 0.1.0 and < 1.0.0\"|kata = { path = \"../kata\" }|' gleam.toml" }
-      # Clear build cache and re-resolve deps from hex
+      - sed 's|kata = { path = "../kata" }|kata = ">= {{.VERSION}} and < 1.0.0"|' gleam.toml > gleam.toml.tmp && mv gleam.toml.tmp gleam.toml
+      - defer: { cmd: "sed 's|kata = \">= .* and < 1.0.0\"|kata = { path = \"../kata\" }|' gleam.toml > gleam.toml.tmp && mv gleam.toml.tmp gleam.toml" }
       - rm -rf build
       - gleam deps download
       - gleam publish
+
+  publish:kata-form:
+    desc: Publish kata_form to hex.pm
+    dir: kata_form
+    cmds:
+      - sed 's|kata = { path = "../kata" }|kata = ">= {{.VERSION}} and < 1.0.0"|' gleam.toml > gleam.toml.tmp && mv gleam.toml.tmp gleam.toml
+      - defer: { cmd: "sed 's|kata = \">= .* and < 1.0.0\"|kata = { path = \"../kata\" }|' gleam.toml > gleam.toml.tmp && mv gleam.toml.tmp gleam.toml" }
+      - rm -rf build
+      - gleam deps download
+      - gleam publish
+
+  publish:kata-env:
+    desc: Publish kata_env to hex.pm
+    dir: kata_env
+    cmds:
+      - sed 's|kata = { path = "../kata" }|kata = ">= {{.VERSION}} and < 1.0.0"|' gleam.toml > gleam.toml.tmp && mv gleam.toml.tmp gleam.toml
+      - defer: { cmd: "sed 's|kata = \">= .* and < 1.0.0\"|kata = { path = \"../kata\" }|' gleam.toml > gleam.toml.tmp && mv gleam.toml.tmp gleam.toml" }
+      - rm -rf build
+      - gleam deps download
+      - gleam publish
+
