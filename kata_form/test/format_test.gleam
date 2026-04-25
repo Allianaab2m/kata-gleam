@@ -41,8 +41,7 @@ pub fn format_decode_parse_error_test() {
 
 pub fn format_encode_test() {
   let login = Login("a@b.com", True)
-  let assert Ok(body) =
-    format.encode(login_schema(), kata_form.format(), login)
+  let assert Ok(body) = format.encode(login_schema(), kata_form.format(), login)
   // Re-decode to verify (URL encoding may vary)
   format.decode(login_schema(), kata_form.format(), body)
   |> should.equal(Ok(login))
@@ -52,8 +51,7 @@ pub fn format_encode_test() {
 
 pub fn roundtrip_test() {
   let login = Login("user@example.com", False)
-  let assert Ok(body) =
-    format.encode(login_schema(), kata_form.format(), login)
+  let assert Ok(body) = format.encode(login_schema(), kata_form.format(), login)
   format.decode(login_schema(), kata_form.format(), body)
   |> should.equal(Ok(login))
 }

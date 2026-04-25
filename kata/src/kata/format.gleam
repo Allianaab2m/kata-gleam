@@ -37,9 +37,7 @@ pub fn decode(
   format: Format(raw),
   input: raw,
 ) -> Result(a, DecodeError) {
-  use value <- result.try(
-    format.parse(input) |> result.map_error(ParseError),
-  )
+  use value <- result.try(format.parse(input) |> result.map_error(ParseError))
   kata_schema.decode(s, value) |> result.map_error(SchemaError)
 }
 

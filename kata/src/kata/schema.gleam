@@ -46,10 +46,7 @@ pub fn to_ast(schema: Schema(a)) -> Ast {
 // Useful for building smart constructors for opaque types.
 
 /// Construct a validated value from a String.
-pub fn from_string(
-  schema: Schema(a),
-  value: String,
-) -> Result(a, List(Error)) {
+pub fn from_string(schema: Schema(a), value: String) -> Result(a, List(Error)) {
   schema.decode(VString(value))
 }
 
@@ -59,10 +56,7 @@ pub fn from_int(schema: Schema(a), value: Int) -> Result(a, List(Error)) {
 }
 
 /// Construct a validated value from a Float.
-pub fn from_float(
-  schema: Schema(a),
-  value: Float,
-) -> Result(a, List(Error)) {
+pub fn from_float(schema: Schema(a), value: Float) -> Result(a, List(Error)) {
   schema.decode(VFloat(value))
 }
 

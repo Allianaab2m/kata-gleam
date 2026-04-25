@@ -49,7 +49,11 @@ pub fn decode_int_test() {
 }
 
 pub fn decode_object_test() {
-  format.decode(user_schema(), kata_json.format(), "{\"name\": \"Alice\", \"age\": 30}")
+  format.decode(
+    user_schema(),
+    kata_json.format(),
+    "{\"name\": \"Alice\", \"age\": 30}",
+  )
   |> should.equal(Ok(User("Alice", 30)))
 }
 
@@ -68,7 +72,8 @@ pub fn encode_int_test() {
 // --- roundtrip ---
 
 pub fn roundtrip_primitive_test() {
-  let assert Ok(json) = format.encode(schema.string(), kata_json.format(), "hello")
+  let assert Ok(json) =
+    format.encode(schema.string(), kata_json.format(), "hello")
   format.decode(schema.string(), kata_json.format(), json)
   |> should.equal(Ok("hello"))
 }

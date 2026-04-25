@@ -35,7 +35,8 @@ pub fn format_decode_missing_field_test() {
 
 pub fn format_encode_test() {
   let config = DbConfig("localhost", 5432)
-  let assert Ok(env) = format.encode(db_config_schema(), kata_env.format(), config)
+  let assert Ok(env) =
+    format.encode(db_config_schema(), kata_env.format(), config)
   dict.get(env, "DB_HOST") |> should.equal(Ok("localhost"))
   dict.get(env, "DB_PORT") |> should.equal(Ok("5432"))
 }
